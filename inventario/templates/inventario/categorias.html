@@ -1,0 +1,63 @@
+{% extends 'inventario/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card card-custom p-4 shadow-sm border-0">
+            <h4 class="fw-bold text-primary mb-4">Nueva Categoría</h4>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Nombre del Grupo</label>
+                    <input type="text" name="nombre" class="form-control" placeholder="Ej: Frutas, Oficina..." required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label small fw-bold">Descripción Corta</label>
+                    <textarea name="descripcion" class="form-control" rows="3" placeholder="Opcional..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-register-custom w-100 fw-bold py-2">
+                    <i class="fas fa-save me-2"></i> Guardar Categoría
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card card-custom p-3 shadow-sm border-0">
+            <h4 class="fw-bold mb-4">Categorías Registradas</h4>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 10%">ID</th>
+                            <th style="width: 30%">Categoría</th>
+                            <th style="width: 45%">Descripción</th>
+                            <th style="width: 15%" class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cat in Categorias %}
+                        <tr>
+                            <td class="text-secondary fw-bold">#{{ cat.id }}</td>
+                            <td class="fw-bold text-dark">{{ cat.nombre }}</td>
+                            <td class="text-muted">{{ cat.descripsion }}</td>
+                            <td class="text-center">
+                                <a href="{% url 'eliminar_categoria' cat.id %}" 
+                                   class="btn btn-sm btn-outline-danger border-0"
+                                   onclick="return confirm('¿Eliminar esta categoría? Esto podría afectar a los productos asociados.')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">No hay categorías. Empieza creando una a la izquierda.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

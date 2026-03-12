@@ -1,0 +1,83 @@
+{% extends 'inventario/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="h3 fw-bold text-gray-800">Panel de Reportes</h2>
+    
+    <form method="get" class="d-flex gap-2 align-items-center">
+        <label class="small text-secondary fw-bold">Filtrar por:</label>
+        <select name="periodo" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="today" {% if periodo_actual == 'today' %}selected{% endif %}>Hoy</option>
+            <option value="week" {% if periodo_actual == 'week' %}selected{% endif %}>Esta Semana</option>
+            <option value="month" {% if periodo_actual == 'month' %}selected{% endif %}>Este Mes</option>
+            <option value="year" {% if periodo_actual == 'year' %}selected{% endif %}>Este Año</option>
+            <option value="all" {% if periodo_actual == 'all' %}selected{% endif %}>Todo el histórico</option>
+        </select>
+    </form>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4 col-lg-3">
+        <div class="card card-custom p-3 bg-white text-center border-start border-4 border-primary">
+            <div class="text-xs text-uppercase text-secondary fw-bold mb-1">Total Movimientos ({{ periodo_actual_label }})</div>
+            <div class="h3 mb-0 fw-bold text-gray-800">{{ total_movimientos }}</div>
+            <small class="text-success"><i class="fas fa-arrow-up"></i> Entradas: {{ entradas }} | <i class="fas fa-arrow-down text-danger"></i> Salidas: {{ salidas }}</small>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-3">
+        <div class="card card-custom p-3 bg-white text-center border-start border-4 border-success">
+            <div class="text-xs text-uppercase text-secondary fw-bold mb-1">Valor Total Venta Stock</div>
+            <div class="h3 mb-0 fw-bold text-success">$ {{ total_valor_venta|floatformat:2 }}</div>
+            <small class="text-secondary">{{ total_productos_stock }} productos distintos en stock</small>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-3">
+        <div class="card card-custom p-3 bg-white text-center border-start border-4 border-warning">
+            <div class="text-xs text-uppercase text-secondary fw-bold mb-1">Margen Bruto Proyectado</div>
+            <div class="h3 mb-0 fw-bold text-warning">$ {{ total_ganancia_proyectada|floatformat:2 }}</div>
+            <small class="text-secondary">Diferencia Precio Venta vs Compra</small>
+        </div>
+    </div>
+</div>
+
+<div class="card card-custom p-3 mb-4">
+    <h5 class="fw-bold mb-3">Movimientos Recientes ({{ periodo_actual_label }})</h5>
+    <div class="table-responsive">
+        <table class="table table-custom table-bordered table-sm align-middle">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Producto</th>
+                    <th>Almacén</th>
+                    <th class="text-center">Cantidad</th>
+                    <th>Motivo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mov in movimientos_periodo %}
+                <tr>
+                    <td>{{ mov.fecha|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        {% if mov.tipo == 'ENTRADA' %}
+                        <span class="badge bg-success">Entrada</span>
+                        {% elif mov.tipo == 'SALIDA' %}
+                        <span class="badge bg-danger">Salida</span>
+                        {% else %}
+                        <span class="badge bg-warning">Ajuste</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ mov.producto.nombre }}</td>
+                    <td>{{ mov.almacen.nombre }}</td>
+                    <td class="text-center fw-bold">{{ mov.cantidad }}</td>
+                    <td class="small">{{ mov.motivo|default:"" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center text-secondary">No hay movimientos en este periodo.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

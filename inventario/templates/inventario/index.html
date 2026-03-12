@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OptiStock | Panel de Inventario</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; color: #333; }
+        .header-custom { background-color: #fff; border-bottom: 2px solid #0056b3; padding: 20px; }
+        .btn-register { background-color: #5a8d44; color: white; border: none; }
+        .btn-register:hover { background-color: #466d35; color: white; }
+        .btn-delete { background-color: #d9534f; color: white; border: none; }
+        .table-custom thead { background-color: #0056b3; color: white; }
+        .card-form { border: none; border-radius: 0; border-top: 1px solid #dee2e6; }
+        input, select { border-radius: 0 !important; border: 1px solid #ced4da !important; background-color: #e9ecef !important; }
+    </style>
+</head>
+<body>
+
+<div class="header-custom d-flex justify-content-between align-items-center">
+    <h2 class="text-primary fw-bold">Compras</h2>
+    <div class="text-center">
+        <h4 class="mb-0 text-secondary" style="letter-spacing: 2px;">OPTI<span class="text-primary">STOCK</span></h4>
+        <small>Inventory Management</small>
+    </div>
+    <div>
+        <a href="{% url 'exportar_csv' %}" class="btn btn-outline-dark btn-sm">Descargar .CSV</a>
+    </div>
+</div>
+
+<div class="container-fluid mt-4">
+    <div class="card card-form p-4 mb-4 shadow-sm">
+        <form method="POST" action="{% url 'registrar_producto' %}" class="row g-3">
+            {% csrf_token %}
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Producto:</label>
+                <input type="text" name="nombre" class="form-control" placeholder="Nombre del producto" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">Código:</label>
+                <input type="text" name="codigo" class="form-control" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">Precio Venta:</label>
+                <input type="number" step="0.01" name="precio_venta" class="form-control" placeholder="$">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">Categoría:</label>
+                <select name="categoria" class="form-select">
+                    {% for cat in categorias %}
+                    <option value="{{ cat.id }}">{{ cat.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-register w-100 fw-bold">Registrar</button>
+                <button type="reset" class="btn btn-delete w-100 fw-bold">Borrar</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-custom table-bordered align-middle">
+            <thead>
+                <tr class="text-center">
+                    <th>Código</th>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Stock Min.</th>
+                    <th>P. Venta</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white">
+                {% for prod in productos %}
+                <tr>
+                    <td class="text-center">{{ prod.codigo }}</td>
+                    <td>{{ prod.nombre }}</td>
+                    <td>{{ prod.categoria.nombre }}</td>
+                    <td class="text-center">{{ prod.stock_minimo }}</td>
+                    <td class="text-end">$ {{ prod.precio_venta }}</td>
+                    <td class="text-center">
+                        <span class="badge {% if prod.activo %}bg-success{% else %}bg-secondary{% endif %}">
+                            {{ prod.activo|yesno:"Activo,Inactivo" }}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <a href="{% url 'editar_producto' prod.id %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                        <form action="{% url 'eliminar_producto' prod.id %}" method="POST" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar?')">X</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
